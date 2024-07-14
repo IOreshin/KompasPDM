@@ -9,7 +9,8 @@ from PyQt5.QtWidgets import QMenu, QAction, QTreeView
 from NerpaPDMUtility import get_error_msg
 from DBMngModule import ProjectDB, UsersDB
 import sys
- 
+
+
 class LoginWindow(QWidget):
     def __init__(self):
         super().__init__()
@@ -101,7 +102,6 @@ class CreateUserWindow(QWidget):
         self.login_window = LoginWindow()
         self.login_window.show()
         self.hide()
-
 
 class PDMWindow(QMainWindow):
     def __init__(self):
