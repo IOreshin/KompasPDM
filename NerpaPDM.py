@@ -1,10 +1,13 @@
 # -*- coding: utf-8 -*-
 
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QPushButton,QLineEdit, QComboBox, QWidget, QGridLayout
+from PyQt5.QtWidgets import (QApplication, QMainWindow, QLabel, 
+                            QPushButton, QLineEdit, QComboBox, 
+                            QWidget, QGridLayout,QMenu,QAction,
+                            QVBoxLayout, QHBoxLayout, QGroupBox,
+                            QTreeView)
 
-from PyQt5.QtWidgets import QMenu, QAction, QTreeView
-
+from PyQt5.QtGui import QStandardItem, QStandardItemModel
 
 from NerpaPDMUtility import get_error_msg
 from DBMngModule import ProjectDB, UsersDB
@@ -108,17 +111,20 @@ class PDMWindow(QMainWindow):
         super().__init__()
         self.setWindowTitle('NerpaPDM')
         self.setFixedSize(1000,1000)
+        self.central_widget = QWidget(self)
+        self.setCentralWidget(self.central_widget)
+
         self.init_ui()
 
     def init_ui(self):
-        self.create_menubar()
-
-        self.full_treeview = QTreeView()
-        self.setCentralWidget(self.full_treeview)
-
-
+        self.main_layout = QVBoxLayout(self.central_widget)
+        self.central_widget.setLayout(self.main_layout)
         
+        self.utility_bar() #создание верхнего бара с общими кнопками
+        self.project_view() #создание treeview для отображения проекта
 
+        self.main_layout.addStretch()
+        
     def create_menubar(self):
         menuBar = self.menuBar()
         self._create_actions()
@@ -159,6 +165,51 @@ class PDMWindow(QMainWindow):
 
     def update_project(self):
         pass
+
+    def utility_bar(self):
+        self.utility_box = QGroupBox('Управление')
+        self.utility_box.setMaximumHeight(100)
+        self.utility_names = (('Выбрать проект', 0, 0),
+                                ('Создать', 0, 1),
+                                ('Обновить', 0, 2),
+                                  )
+        self.utility_layout = QGridLayout()
+
+        self.utility_buttons = [QPushButton(name[0]) for name in self.utility_names]
+        for i, button in enumerate(self.utility_buttons):
+            self.utility_layout.addWidget(button, self.utility_names[i][1],
+                                              self.utility_names[i][2])
+        
+        self.utility_box.setLayout(self.utility_layout)
+        self.central_widget.layout().addWidget(self.utility_box)
+        return self.utility_box
+        
+    def project_view(self):
+        self.project_view_tree = QTreeView()
+        self.central_widget.layout().addWidget(self.project_view_tree)
+        
+        model = QStandardItemModel()
+        model.setHorizontalHeaderLabels(['Items'])
+
+        parent1 = QStandardItem("Parent 1")
+        child1 = QStandardItem("Child 1")
+        child2 = QStandardItem("Child 2")
+
+        parent1.appendRow(child1)
+        parent1.appendRow(child2)
+
+        parent2 = QStandardItem("Parent 2")
+        child3 = QStandardItem("Child 3")
+
+        parent2.appendRow(child3)
+
+        model.appendRow(parent1)
+        model.appendRow(parent2)
+
+        self.project_view_tree.setModel(model)
+        
+
+
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

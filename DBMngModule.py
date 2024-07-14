@@ -4,22 +4,43 @@ import sqlite3
 from NerpaPDMUtility import get_error_msg, get_info_msg
 
 class ProjectDB():
-    def __init__(self, db_path):
+    def __init__(self, db_path, project_name):
         self.conn = sqlite3.connect(db_path)
         self.cursor = self.conn.cursor()
+        self.project_name = project_name
+        self.history_project_name = project_name+' history'
         
-    def create_project(self, project_name):
-        self.cursor.execute(f"""CREATE TABLE {project_name} 
-                            (id INTEGER PRIMARY KEY, 
-                            PN TEXT,
-                            DESCRIPTION TEXT,
-                            QTY INTEGER,
-                            ADMITTANCE TEXT)"""
-                            )
+    def create_project(self):
+        self.cursor.execute(
+            f"""CREATE TABLE {self.project_name}
+            (id INTEGER PRIMARY KEY AUTOINCREMENT,
+            parent_id INTEGER,
+            PN TEXT,
+            DESCRIPTION TEXT,
+            QTY INTEGER,
+            VERSION INTEGER NOT NULL DEFAULT 1,
+            TIMESTAMP TEXT,
+            ACTIVE BOOLEAN NOT NULL DEFAULT 1,
+            FOREIGN KEY (parent_id) REFERENCES items (id))"""
+            )
         
-    def get_full_info(self, project_name):
-        self.cursor.execute(f"""SELECT *
-                            FROM {project_name}""")
+        self.cursor.execute(
+            f"""CREATE TABLE {self.history_project_name}
+            (id INTEGER,
+            parent_id INTEGER,
+            PN TEXT,
+            DESCRIPTION TEXT,
+            QTY INTEGER,
+            VERSION INTEGER NOT NULL,
+            TIMESTAMP TEXT,
+            ACTIVE BOOLEAN,
+            CHANGE_TIMESTAMP TEXT,
+            FOREIGN KEY (parent_id) REFERENCES items (id))""")
+
+        self.conn.commit()
+        self.conn.close()
+
+
 
 class UsersDB():
     def __init__(self):
